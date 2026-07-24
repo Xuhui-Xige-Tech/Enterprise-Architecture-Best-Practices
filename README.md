@@ -11,4 +11,4 @@
 * [05. 架构实战：高并发分销系统的“财务噩梦”，二级分销跳档计算死锁与分布式防刷算法](./05-distribution-anti-fraud.md)
 * [06. 架构实战：用私有AI重新激活陈旧系统——构建本地知识库与语义网关案例](./06-legacy-modernization-with-private-ai.md)
 * [07. 多源异构 Excel 自动集成与时序状态追踪：如何构建自适应数据看板？](./07-heterogeneous-excel-fsm.md)
-```
+* [08. 陪诊小程序开发底层方案：如何通过 FSM 状态机强物理定责与服务商分账规避“二清”红线？](./08-accompany-fsm-compliance.md)
