@@ -12,3 +12,4 @@
 * [06. 架构实战：用私有AI重新激活陈旧系统——构建本地知识库与语义网关案例](./06-legacy-modernization-with-private-ai.md)
 * [07. 多源异构 Excel 自动集成与时序状态追踪：如何构建自适应数据看板？](./07-heterogeneous-excel-fsm.md)
 * [08. 陪诊小程序开发底层方案：如何通过 FSM 状态机强物理定责与服务商分账规避“二清”红线？](./08-accompany-fsm-compliance.md)
+* [09. 上门 O2O 平台底层架构设计：家政维修与同城到家理疗双场景下的分布式防刷单、LBS 轨迹安防与状态机防跳单实战](./09-o2o-fsm-anti-fraud.md)
