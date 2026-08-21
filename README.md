@@ -16,3 +16,4 @@
 * [10. 中欧班列多式联运与跨境货代系统底层架构：多币种财务结算、节点 FSM 状态机与异构 EDI 自动对账实战](./10-multi-modal-logistics-fsm.md)
 * [11. 政企消费补贴与商户核销系统底层架构：二级审批流、设备指纹风控与电子合同鉴签实战](./11-gov-subsidy-anti-fraud.md)
 * [12. 跨境电商 OMS/WMS 多仓并发调度系统底层架构：三态库存锁、异构 SKU 动态映射与长周期调拨 FSM 实战](./12-cross-border-erp-fsm.md)
+* [13. 中小离散制造 MES 工序状态机与计件防作弊架构：报工工序锁、边际产能上限校验与不良品追溯实战](./13-mes-discrete-manufacturing-fsm.md)
