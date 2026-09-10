@@ -18,3 +18,4 @@
 * [12. 跨境电商 OMS/WMS 多仓并发调度系统底层架构：三态库存锁、异构 SKU 动态映射与长周期调拨 FSM 实战](./12-cross-border-erp-fsm.md)
 * [13. 中小离散制造 MES 工序状态机与计件防作弊架构：报工工序锁、边际产能上限校验与不良品追溯实战](./13-mes-discrete-manufacturing-fsm.md)
 * [14. 工业遗留设备非侵入式数采架构: Modbus/OPC-UA 边缘适配网关、时序数据差分压缩与断网自愈实战](./14-iot-plc-edge-gateway.md)
+* [15. 智能自动化立体库与多AGV调度架构: WMS/WCS统一指令状态机、时空预约拓扑与死锁消解实战](./15-asrs-agv-wms-wcs-fsm.md)
