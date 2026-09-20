@@ -19,3 +19,4 @@
 * [13. 中小离散制造 MES 工序状态机与计件防作弊架构：报工工序锁、边际产能上限校验与不良品追溯实战](./13-mes-discrete-manufacturing-fsm.md)
 * [14. 工业遗留设备非侵入式数采架构: Modbus/OPC-UA 边缘适配网关、时序数据差分压缩与断网自愈实战](./14-iot-plc-edge-gateway.md)
 * [15. 智能自动化立体库与多AGV调度架构: WMS/WCS统一指令状态机、时空预约拓扑与死锁消解实战](./15-asrs-agv-wms-wcs-fsm.md)
+* [16. 中小按单制造（MTO/ETO）APS 动态排产与物料齐套率状态机: 插单震荡抑制与有限产能约束实战](./16-aps-kitting-fsm.md)
