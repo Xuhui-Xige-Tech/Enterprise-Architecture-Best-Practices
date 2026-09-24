@@ -20,3 +20,7 @@
 * [14. 工业遗留设备非侵入式数采架构: Modbus/OPC-UA 边缘适配网关、时序数据差分压缩与断网自愈实战](./14-iot-plc-edge-gateway.md)
 * [15. 智能自动化立体库与多AGV调度架构: WMS/WCS统一指令状态机、时空预约拓扑与死锁消解实战](./15-asrs-agv-wms-wcs-fsm.md)
 * [16. 中小按单制造（MTO/ETO）APS 动态排产与物料齐套率状态机: 插单震荡抑制与有限产能约束实战](./16-aps-kitting-fsm.md)
+* [17. 离散制造 QMS 质量闭环与防漏检工序锁架构: 动态 AQL 转移、数字量具防呆与 8D 异常处置状态机实战](./17-qms-inspection-fsm.md)
+* [18. 工业能源 EMS 与两部制电价需量削峰状态机架构: 大功率负载动态错峰、预测性需量控制与需量超限熔断实战](./18-ems-demand-shaving-fsm.md)
+* [19. 工业设备预测性维护(PdM)与振动故障机理诊断架构: 高频时序特征提取、轴承/齿轮机理模型与劣化状态机闭环实战](./19-pdm-predictive-maintenance-fsm.md)
+* [20. 工业企业主数据管理(MDM)与多态 BOM 演化架构: 一物多码特征哈希防重、EBOM/PBOM/MBOM 差异 Diff 与 ECN 变更穿透状态机实战](./20-mdm-multistage-bom-ecn-fsm.md)
