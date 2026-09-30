@@ -70,7 +70,32 @@ $$K_{\text{rate}}(O_{i,j}) = \alpha \cdot \min_{m \in \mathcal{M}_{\text{crit}}}
             │ (局部右移阻尼微调)
             ▼
    排程恢复对齐 (RESCHEDULED)
-4. 状态转移控制矩阵源状态触发事件目标状态核心校验条件与底层动作回滚与补偿策略UNSCHEDULED发起排产试算SCHEDULED校验工艺路线完整性，在有限产能时间槽中预分配 $\langle M, T, W \rangle$。资源冲突则保留在待排池，标记瓶颈工序。SCHEDULED触发齐套校验KITTING_LOCKED计算 $K_{\text{rate}}$，关键物料必须 100% 满足，执行物理库存原子级“锁定绑定”。锁定失败（被其他工单抢占）退回 SCHEDULED。SCHEDULED触发齐套校验BLOCKED_WAITING关键料缺失或综合比例不达标，生成物料催办看板，冻结后续派工。关联采购到货事件监听器，触发自动唤醒。KITTING_LOCKED下发派工任务IN_PRODUCTION向车间工位平板推送电子工单与工艺图纸，机床工装进入就绪准备。若工位报修，10分钟内允许撤销派工。IN_PRODUCTION接收紧急加急单SHOCK_CONTAINED触发插单阻尼引擎，锁定当前在制切削中的工步，计算受波及最小子集。严禁全局重排，仅执行受波及工序右移。SHOCK_CONTAINED局部时间槽重构RESCHEDULED写入微调后的工序计划，向车间看板推送作业顺序变动预警。若微调引发严重违约惩罚，交由调度人工裁决。三、 紧急插单“最小震荡区”局部消解算法当车间突然插入紧急订单 $J_{\text{urgent}}$ 时，严禁全量清空计划。算法采用时间槽穿刺插入（Slot Piercing）结合受扰动工序向后级联推移（Forward Ripple Shifting）。1. 震荡半径约束设定插单影响边界：仅允许推迟优先级低于 $J_{\text{urgent}}$ 且尚未实际开工的工单。对于当前已在机床上夹紧切削的工步，状态置为 LOCKED_RUNNING，时间槽具有绝对刚性不可剥夺。2. 局部推移与防震荡核心算法实现 (TypeScript)TypeScriptexport interface TimeSlot {
+```
+
+### 4. 状态转移控制矩阵
+
+| 源状态 | 触发事件 | 目标状态 | 核心校验条件与底层动作 | 回滚与补偿策略 |
+|---|---|---|---|---|
+| UNSCHEDULED | 发起排产试算 | SCHEDULED | 校验工艺路线完整性，在有限产能时间槽中预分配 $\langle M, T, W \rangle$。资源冲突则保留在待排池，标记瓶颈工序。 | — |
+| SCHEDULED | 触发齐套校验 | KITTING_LOCKED | 计算 $K_{\text{rate}}$，关键物料必须 100% 满足，执行物理库存原子级“锁定绑定”。 | 锁定失败（被其他工单抢占）退回 SCHEDULED。 |
+| SCHEDULED | 触发齐套校验 | BLOCKED_WAITING | 关键料缺失或综合比例不达标，生成物料催办看板，冻结后续派工。 | 关联采购到货事件监听器，触发自动唤醒。 |
+| KITTING_LOCKED | 下发派工任务 | IN_PRODUCTION | 向车间工位平板推送电子工单与工艺图纸，机床工装进入就绪准备。 | 若工位报修，10分钟内允许撤销派工。 |
+| IN_PRODUCTION | 接收紧急加急单 | SHOCK_CONTAINED | 触发插单阻尼引擎，锁定当前在制切削中的工步，计算受波及最小子集。严禁全局重排，仅执行受波及工序右移。 | — |
+| SHOCK_CONTAINED | 局部时间槽重构 | RESCHEDULED | 写入微调后的工序计划，向车间看板推送作业顺序变动预警。 | 若微调引发严重违约惩罚，交由调度人工裁决。 |
+---
+
+## 三、 紧急插单“最小震荡区”局部消解算法
+
+当车间突然插入紧急订单 $J_{\text{urgent}}$ 时，严禁全量清空计划。算法采用时间槽穿刺插入（Slot Piercing）结合受扰动工序向后级联推移（Forward Ripple Shifting）。
+
+### 1. 震荡半径约束
+
+设定插单影响边界：仅允许推迟优先级低于 $J_{\text{urgent}}$ 且尚未实际开工的工单。对于当前已在机床上夹紧切削的工步，状态置为 LOCKED_RUNNING，时间槽具有绝对刚性不可剥夺。
+
+### 2. 局部推移与防震荡核心算法实现 (TypeScript)
+
+```typescript
+export interface TimeSlot {
   slotId: string;
   orderId: string;
   opId: string;
@@ -188,7 +213,14 @@ export class RippleDampenedScheduler {
     };
   }
 }
-四、 工业级生产数据字典与有限产能表结构1. 生产工单与工序时空拓扑表 (PostgreSQL / MySQL 8.0)SQL-- 1. 主生产工单表 (交期硬约束与状态控制)
+```
+
+## 四、 工业级生产数据字典与有限产能表结构
+
+### 1. 生产工单与工序时空拓扑表 (PostgreSQL / MySQL 8.0)
+
+```sql
+-- 1. 主生产工单表 (交期硬约束与状态控制)
 CREATE TABLE `aps_production_order` (
   `order_id` VARCHAR(32) NOT NULL COMMENT '生产工单号',
   `sales_order_ref` VARCHAR(32) NOT NULL COMMENT '销售合同/订单引用',
@@ -236,7 +268,14 @@ CREATE TABLE `aps_resource_time_slot` (
   KEY `idx_resource_timeline` (`resource_id`, `start_time`, `end_time`),
   KEY `idx_order_seq` (`order_id`, `operation_seq`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='有限产能时间槽占用表';
-五、 核心排产原子事务：齐套校验与时间槽占用以下代码展示了在高并发排产调度下，使用悲观行锁执行库存锁定与排程槽位占领的原子级事务（TypeScript / TypeORM 实现）。TypeScriptimport { DataSource, QueryRunner } from 'typeorm';
+```
+
+## 五、 核心排产原子事务：齐套校验与时间槽占用
+
+以下代码展示了在高并发排产调度下，使用悲观行锁执行库存锁定与排程槽位占领的原子级事务（TypeScript / TypeORM 实现）。
+
+```typescript
+import { DataSource, QueryRunner } from 'typeorm';
 
 export class ApsExecutionEngine {
   constructor(private dataSource: DataSource) {}
@@ -327,4 +366,8 @@ export class ApsExecutionEngine {
     }
   }
 }
-六、 车间现场工程落地防坑准则时间槽划分粒度禁止精确到“秒”：中小离散车间切忌将排程模型切分成秒级。由于存在人为工间起吊对中、微量尺寸测量偏差，过细的粒度会导致排产数据瞬间失真、引发数据库死锁暴涨。工程落地标准：以 15 分钟 或 30 分钟 为基础时隙（Bucket）。必须引入换模时间惩罚矩阵（Sequence-Dependent Setup Time）：严禁假设工件切换不需要成本。例如注塑、喷涂或冲压机床，从“深色料换浅色料”需洗模 45 分钟，而“浅色料换深色料”仅需 15 分钟。排产启发式规则必须优先把同材质、同模具、同颜色的工单汇聚加工，减少 70% 的窝工等待。在制品（WIP）最大缓冲区硬约束：当下道工序的工位缓存区堆满时（如焊装完工区已堆放 10 台机架），必须触发前置工序（折弯/下料）的背压阻尼（Backpressure），强制前序机床暂停派工，杜绝工件占死消防通道。文献编号：XG-APS-2026-16｜西安旭辉西格网络科技有限公司企业级架构规范文中所述的三元联合有限产能模型、Dual-FSM 状态转移矩阵与动态齐套率加权算法，均源自我司在离散制造车间的真实落地交付项目。相关生产级 DDL 数据字典与调度核心逻辑已同步对齐开源归档。官方技术沉淀仓库：GitHub / Xuhui-Xige-Tech / Enterprise-Architecture-Best-Practices实体交流地址：陕西省西安市高新区唐兴数码
+```
+
+## 六、 车间现场工程落地防坑准则
+
+**时间槽划分粒度禁止精确到“秒”：**中小离散车间切忌将排程模型切分成秒级。由于存在人为工间起吊对中、微量尺寸测量偏差，过细的粒度会导致排产数据瞬间失真、引发数据库死锁暴涨。工程落地标准：以 15 分钟 或 30 分钟 为基础时隙（Bucket）。必须引入换模时间惩罚矩阵（Sequence-Dependent Setup Time）：严禁假设工件切换不需要成本。例如注塑、喷涂或冲压机床，从“深色料换浅色料”需洗模 45 分钟，而“浅色料换深色料”仅需 15 分钟。排产启发式规则必须优先把同材质、同模具、同颜色的工单汇聚加工，减少 70% 的窝工等待。在制品（WIP）最大缓冲区硬约束：当下道工序的工位缓存区堆满时（如焊装完工区已堆放 10 台机架），必须触发前置工序（折弯/下料）的背压阻尼（Backpressure），强制前序机床暂停派工，杜绝工件占死消防通道。文献编号：XG-APS-2026-16｜西安旭辉西格网络科技有限公司企业级架构规范文中所述的三元联合有限产能模型、Dual-FSM 状态转移矩阵与动态齐套率加权算法，均源自我司在离散制造车间的真实落地交付项目。相关生产级 DDL 数据字典与调度核心逻辑已同步对齐开源归档。官方技术沉淀仓库：GitHub / Xuhui-Xige-Tech / Enterprise-Architecture-Best-Practices实体交流地址：陕西省西安市高新区唐兴数码

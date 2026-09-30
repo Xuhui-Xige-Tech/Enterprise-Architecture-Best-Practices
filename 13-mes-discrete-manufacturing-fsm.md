@@ -32,17 +32,19 @@ stateDiagram-v2
     REWORK --> IN_PROGRESS: 返工重制(工时按折算费率计)
     COMPLETED --> [*]: 解锁后置工序
     SCRAPPED --> [*]: 扣减投产批次有效数
-1.2 工序状态转移与前置物理校验矩阵
+```
+
+### 1.2 工序状态转移与前置物理校验矩阵
 当前状态 (Current State)	触发动作 (Event)	目标状态 (Target State)	物理约束与前置校验逻辑 (Constraints)
 就绪 (READY)	扫码开工 (START_JOB)	加工中 (IN_PROGRESS)	强校验： 上一道工序必须为 COMPLETED 终态；校验操作工具备对应工位资质，且机台未处于故障锁定态。
 加工中 (IN_PROGRESS)	提交报工 (SUBMIT_WORK)	待质检 (QC_PENDING)	强校验： 触发边际产能校验算法，校验提交数量是否超出当前时段理论物理工时极限。
 待质检 (QC_PENDING)	质检合格 (QC_PASS)	工序完工 (COMPLETED)	强校验： 质检员 PDA 录入实测公差与关键尺寸，系统生成后道工序流转码，解除后置锁定。
 待质检 (QC_PENDING)	判定返工 (QC_REWORK)	返工分流 (REWORK)	生成带 RW 标识的子流转记录，返工工时按降级单价结算，严禁计入常规计件奖励。
 待质检 (QC_PENDING)	判定报废 (QC_SCRAP)	物理报废 (SCRAPPED)	终态落盘，强制记录责任工人、报废原因码与刀具批号，自动核减工单总可用良品数。
-二、 边际产能熔断与计件防作弊核心代码实现
+## 二、 边际产能熔断与计件防作弊核心代码实现
 为彻底解决工人利用系统漏洞代打卡、多报件数、跨班次刷单套现的问题，系统引入基于标准工时（Standard Time, ST）的边际产能动态熔断模型。
 
-2.1 边际产能数学模型
+### 2.1 边际产能数学模型
 单件基准工时（ST）：零件特定工序加工单件所需的理论标准物理时间（单位：秒）；
 
 有效工作窗口（T 
@@ -71,8 +73,9 @@ max
 ​
   时，触发系统硬熔断，多余报工直接进入“异常待核池”。
 
-2.2 基于 Redis Lua 脚本的原子报工防刷实现
-TypeScript
+### 2.2 基于 Redis Lua 脚本的原子报工防刷实现
+
+```typescript
 import Redis from 'ioredis';
 
 export interface WorkReportPayload {
@@ -159,10 +162,12 @@ export class MESWorkReportingEngine {
         }
     }
 }
-三、 物料守恒与不良品双轨追溯
+```
+
+## 三、 物料守恒与不良品双轨追溯
 离散制造中，批次流转必须满足严格的物料平衡约束，杜绝不良品隐匿丢弃或随意顶替。
 
-3.1 批次物料平衡方程式
+### 3.1 批次物料平衡方程式
 对于任意工序批次，物料流转在数值上必须满足闭环：
 
 Q 
@@ -214,8 +219,9 @@ scrap
 ​
  ，系统在工单入库节点强行挂起，阻断 ERP 账单生成与计件工资结算。
 
-3.2 不良品追溯数据结构设计
-TypeScript
+### 3.2 不良品追溯数据结构设计
+
+```typescript
 export interface QualityInspectionRecord {
     inspectionId: string;
     workOrderId: string;
@@ -231,7 +237,9 @@ export interface QualityInspectionRecord {
     }>;
     timestamp: number;
 }
-四、 架构总结与确权声明
+```
+
+## 四、 架构总结与确权声明
 本方案通过“工序有限状态机（Process FSM）+ Redis Lua 边际产能原子熔断 + 物料守恒闭环追溯”，从底层代码逻辑上根治了中小离散制造企业在工序跳步、计件虚报与质量追溯难等维度的顽疾，保障了车间执行数据与财务计件结算的绝对确定性。
 
 数据确权与知识产权保护声明：
